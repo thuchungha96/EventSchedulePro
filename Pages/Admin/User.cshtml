@@ -1,0 +1,73 @@
+﻿@page
+@model EventSchedulePro.Pages.Admin.UserModel
+@using MySql.Data.MySqlClient
+@inject IHttpContextAccessor _httpContext
+@{
+    var userName = _httpContext.HttpContext.Session.GetString("AdminUserName");
+}
+<div class="row">
+    <div class="col-md-4">
+        <section>
+            <form id="account" method="post">
+                <hr />
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="username" />
+                    <label asp-for="Input.Username" class="form-label">UserName</label>
+                    <span asp-validation-for="Input.Username" class="text-danger"></span>
+                </div>
+                <!--
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                    <label asp-for="Input.Password" class="form-label">Password</label>
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+                -->
+                <div>
+                    <button id="login-submit" type="submit" class="w-100 btn btn-primary">Add User</button>
+                </div>
+                <div>
+                </div>
+            </form>
+        </section>
+    </div>
+    <div class="col-md-8">
+        <table class="table">
+            <thead>
+                <tr>  
+                    <th scope="col">#</th>
+                    <th scope="col">UserName</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+
+                    using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                    {
+                        conn.Open();
+                        string sql = "SELECT * from user where  RoleUser <> 3";
+                        MySqlCommand cmd = new MySqlCommand(sql, conn);
+                        using (MySqlDataReader rdr = cmd.ExecuteReader())
+                        {
+                            while (rdr.Read())
+                            {
+                                <tr>
+                                    <th scope="row">@rdr.GetInt32(0).ToString()</th>
+                                    <td> @rdr.GetString(1)</td>
+                                    <td>
+                                        <form id="Delete" method="post">
+                                            <input type="hidden" name="Id" value="@rdr.GetInt32(0).ToString()" />
+                                            <button type="submit" class="btn btn-danger" value="Delete" asp-page-handler="Delete">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                }
+               
+            </tbody>
+        </table>
+        </div>
+</div>

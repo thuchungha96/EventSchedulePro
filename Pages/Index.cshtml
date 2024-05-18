@@ -1,0 +1,102 @@
+﻿@page
+@model IndexModel
+@using MySql.Data.MySqlClient
+@inject IHttpContextAccessor _httpContext
+@{
+    var userName = _httpContext.HttpContext.Session.GetString("AdminUserName");
+    var userGroup = _httpContext.HttpContext.Session.GetString("UserGroupId");
+    ViewData["Title"] = "Home Schedule";
+}
+
+<center>
+    <h3>In-Person Orientation Staff Schedule @DateTime.Now.ToString("yyyy") </h3>
+    <h4>@DateTime.Now.ToString("dddd dd MMMM yyyy") - <button class="btn btn-outline-primary" id="printable">Print data</button></h4>
+</center>
+<div class="row">
+    <div class="col-md-12">
+        <table border="1" class="table" id="printTable">
+            <thead>
+                <tr>
+                    <th scope="col" style="width:15%">Time</th>
+                    <th scope="col" style="width:70%"><center><b>Activity</b> / <a>Notes</a> / <a style="color:deepskyblue">Staff</a> / <a style="color:green">Student Leaders</a></center></th>
+                    <th scope="col" style="width:5%">Group</th>
+                    <th scope="col" style="width:10%">Location</th>
+                    <!--@if (!String.IsNullOrEmpty(userName))
+                    {
+                        <th scope="col" style="width:5%">Group</th>
+                        <th scope="col" style="width:10%">Location</th>
+                    }
+                    else
+                    {
+                        <th scope="col" style="width:15%">Location</th>
+                    }-->
+                </tr>
+            </thead>
+            <tbody>
+                @{
+
+                    using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                    {
+                        conn.Open();
+                        string sql = "select us.id, us.name, us.Activity, us.StaffNames, us.StudentLeader, us.Note, us.Date, us.Location, CASE WHEN gd.id IS NULL THEN 'None' ELSE gd.name END AS name, us.fromtime, us.totime from schedule us left join GroupSchedule gd on us.groupid = gd.id";
+
+                        var staff = _httpContext.HttpContext.Request.Query["Staff"];
+                        if (!String.IsNullOrEmpty(staff))
+                        {
+                            sql += $" where us.StaffNames like '%{staff}%' OR gd.name like '%all%'";
+                        }
+                        else
+                        {
+                            if (!String.IsNullOrEmpty(userGroup) && String.IsNullOrEmpty(userName))
+                            {
+                                sql += $" where us.groupid in({userGroup}) OR gd.name like '%all%'";
+                            }
+                        }
+                        MySqlCommand cmd = new MySqlCommand(sql, conn);
+                        using (MySqlDataReader rdr = cmd.ExecuteReader())
+                        {
+                            while (rdr.Read())
+                            {
+                                string class_ge = "table-primary";
+                                var groupuser = rdr.GetString(8).ToLower();
+                                class_ge = groupuser.IndexOf("blue") != -1 ? "btn btn-outline-primary" : groupuser.IndexOf("yellow") != -1 ? "btn btn-outline-warning" : groupuser.IndexOf("pink") != -1 ? "btn btn-outline-danger" : groupuser.IndexOf("green") != -1 ? "btn btn-outline-success" : groupuser.IndexOf("hsc") != -1 ? "btn btn-outline-secondary" : "btn btn-outline-dark";
+                                <tr>
+                                    <td> <!--@rdr.GetDateTime(6).ToString("dd/MM/yyyy")<br />-->
+                                    @rdr.GetString(9) - @rdr.GetString(10)
+                                    
+                                    </td>
+                                    <td>
+                                        @rdr.GetString(1)<Br/>
+                                        Activity: <b>@rdr.GetString(2)</b>
+                                        <Br />Notes: <a>@rdr.GetString(5)</a>
+                                        <Br />Staff: <a style="color:deepskyblue">@rdr.GetString(3)</a>
+                                        <Br />Student Leaders: <a style="color:green">@rdr.GetString(4)</a>                                                                                                         
+                                    </td>
+                                    <td><center><button class="@class_ge" style="">@rdr.GetString(8)</button></center></td>
+                                    <td> @rdr.GetString(7)</td>
+                                </tr>
+                            }
+                        }
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+<script>
+    function printData() {
+        var divToPrint = document.getElementById("printTable");
+        newWin = window.open("");
+        newWin.document.write(divToPrint.outerHTML);
+        newWin.print();
+        newWin.close();
+    }
+
+        $('#printable').on('click', function () {
+        printData();
+    })
+</script>
+}

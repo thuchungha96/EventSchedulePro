@@ -1,0 +1,78 @@
+﻿@page
+@model EventSchedulePro.Pages.AllScheduleModel
+@{
+}
+<div class="row">
+    @{
+        var tlist = (List<List<object>>)ViewData["ExcelData"];
+    }
+    <div class="col-md-12">
+        <ul class="timeline" id="printTable">
+            @{
+                if (tlist != null && tlist.Count > 0)
+                {
+                    @for (int i = 1; i < tlist.Count(); i++)
+                    {
+                        <li>
+                            <p class="timeline-date">@tlist[i][0]</p>
+                            <div class="timeline-content">
+                                <h3>@tlist[i][1]</h3>
+                                <p>
+                                    Notes: <b>@tlist[i][2]</b> <br />
+                                    Student Leader: <a style="color:green">@tlist[i][3]</a><br />
+                                    Staff: <a style="color:deepskyblue">@tlist[i][5]</a><br />
+                                    Group:  <a style="color:darkslategrey">@tlist[i][4]</a><br />
+                                    Location:  <a style="color:coral">@tlist[i][6]</a>
+                                </p>
+                            </div>
+                        </li>
+                    }
+                }
+            }
+        </ul>
+    </div>
+</div>
+<style>
+    .timeline {
+        list-style: none;
+    }
+
+        .timeline > li {
+            margin-bottom: 60px;
+        }
+
+    /* for Desktop */
+    @@media ( min-width : 640px ) {
+        .timeline > li {
+            overflow: hidden;
+            margin: 0;
+            position: relative;
+        }
+
+        .timeline-date {
+            width: 150px;
+            float: left;
+            margin-top: 20px;
+        }
+
+        .timeline-content {
+            width: 75%;
+            float: left;
+            border-left: 3px #e5e5d1 solid;
+            padding-left: 30px;
+        }
+
+            .timeline-content:before {
+                content: '';
+                width: 12px;
+                height: 12px;
+                background: #6fc173;
+                position: absolute;
+                left: 146px;
+                top: 24px;
+                border-radius: 100%;
+            }
+    }
+</style>
+
+    </div>

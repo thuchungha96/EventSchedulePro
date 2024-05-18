@@ -1,0 +1,239 @@
+﻿@page
+@model EventSchedulePro.Pages.Admin.ScheduleModel
+@using MySql.Data.MySqlClient
+@inject IHttpContextAccessor _httpContext
+@{
+}
+<div class="row">
+    <div class="col-md-3">
+        <section>
+            <form id="account" method="post">
+                <hr />
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Id" class="form-control" autocomplete="Name" aria-required="true" placeholder="Id"  readonly/>
+                    <label asp-for="Input.Id" class="form-label">Id</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <select asp-for="Input.Group" class="form-select " aria-label="Default select example">
+                        <option selected id="-1">Select group</option>
+                        @{
+
+                            using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                            {
+                                conn.Open();
+                                string sql = "SELECT * from GroupSchedule";
+                                MySqlCommand cmd = new MySqlCommand(sql, conn);
+                                using (MySqlDataReader rdr = cmd.ExecuteReader())
+                                {
+                                    while (rdr.Read())
+                                    {
+                                        <option value=@rdr.GetInt32(0).ToString()>@rdr.GetString(1)</option>
+
+                                    }
+                                }
+                            }
+                        }
+                    </select>
+                    <label asp-for="Input.Group" class="form-label">Group</label>
+                    <span asp-validation-for="Input.Group" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Name" class="form-control" autocomplete="Name" aria-required="true" placeholder="Name" />
+                    <label asp-for="Input.Name" class="form-label">Name</label>
+                    <span asp-validation-for="Input.Name" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Activity" class="form-control" autocomplete="Activity" aria-required="true" placeholder="Activity" />
+                    <label asp-for="Input.Activity" class="form-label">Activity</label>
+                    <span asp-validation-for="Input.Activity" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                  <!--  <input asp-for="Input.Staff" class="form-control" autocomplete="Staff" aria-required="true" placeholder="Staff" /> -->
+                    <select id="choices-multiple-remove-button" class="select_all" multiple asp-for="Input.Stafff">
+                        @{
+
+                            using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                            {
+                                conn.Open();
+                                string sql = "SELECT * from User";
+                                MySqlCommand cmd = new MySqlCommand(sql, conn);
+                                using (MySqlDataReader rdr = cmd.ExecuteReader())
+                                {
+                                    while (rdr.Read())
+                                    {
+                                        <option value=@rdr.GetInt32(0).ToString()>@rdr.GetString(1)</option>
+
+                                    }
+                                }
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="Input.Stafff" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Leader" class="form-control" autocomplete="Leader" aria-required="true" placeholder="Leader" />
+                    <label asp-for="Input.Leader" class="form-label">Student Leader</label>
+                    <span asp-validation-for="Input.Leader" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Note" class="form-control" autocomplete="Note" aria-required="true" placeholder="Note" />
+                    <label asp-for="Input.Note" class="form-label">Note</label>
+                    <span asp-validation-for="Input.Note" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Location" class="form-control" autocomplete="Location" aria-required="true" placeholder="Location" />
+                    <label asp-for="Input.Location" class="form-label">Location</label>
+                    <span asp-validation-for="Input.Location" class="text-danger"></span>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    <div class='input-group date' id='datetimepicker1' >
+                        <input type='text' class="form-control" asp-for="Input.TimeSchedule" />
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                    <span asp-validation-for="Input.TimeSchedule" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <select asp-for="Input.FromTime" class="form-select" aria-label="Default select example">
+                        <option selected id="-1"></option>
+                        @{
+                            int mins = 0;
+                            int hours = 0;
+                            while (hours < 24)
+                            {
+                                var hourstring = hours.ToString().Count() == 1 ? "0" + hours.ToString() : hours.ToString();
+                                var minstring = mins.ToString().Count() == 1 ? "0" + mins.ToString() : mins.ToString();
+                                var valueid = hourstring + ":" + minstring;
+                                <option value='@valueid'>@valueid</option>
+                                mins += 5;
+                                if (mins == 60)
+                                {
+                                    mins = 0;
+                                    hours++;
+                                }
+                            }
+                        }
+                    </select>
+                    <label asp-for="Input.FromTime" class="form-label">Time From</label>
+                    <span asp-validation-for="Input.FromTime" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <select asp-for="Input.ToTime" class="form-select" aria-label="Default select example">
+                        <option selected id="-1"></option>
+                        @{
+                            int minsto = 0;
+                            int hoursto = 0;
+                            while (hoursto < 24)
+                            {
+                                var hourstring = hoursto.ToString().Count() == 1 ? "0" + hoursto.ToString() : hoursto.ToString();
+                                var minstring = minsto.ToString().Count() == 1 ? "0" + minsto.ToString() : minsto.ToString();
+                                var valueid = hourstring + ":" + minstring;
+                                <option value='@valueid'>@valueid</option>
+                                minsto += 5;
+                                if (minsto == 60)
+                                {
+                                    minsto = 0;
+                                    hoursto++;
+                                }
+                            }
+                        }
+                    </select>
+                    <label asp-for="Input.ToTime" class="form-label">Time To</label>
+                    <span asp-validation-for="Input.ToTime" class="text-danger"></span>
+                </div>
+                <div>
+                    <button id="login-submit" type="submit" class="w-100 btn btn-primary" value="Add" asp-page-handler="Add">Add Schedule</button>
+                </div>
+                <div>
+                </div>
+            </form>
+        </section>
+    </div>
+    
+    <div class="col-md-9 table-responsive" style="max-height:900px">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Group</th>
+                    <th scope="col">Activity</th>
+                    <th scope="col">Staff</th>
+                    <th scope="col">Student Leader</th>
+                    <th scope="col">Note</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">Date</th>
+                       <th scope="col">From</th>
+                    <th scope="col">To</th>
+                    <th scope="col">Active</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+
+                    using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                    {
+                        conn.Open();
+                        string sql = "select us.id, us.name, us.Activity, us.StaffNames, us.StudentLeader, us.Note, us.Date, us.Location, CASE WHEN gd.id IS NULL THEN 'None' ELSE gd.name END AS name, us.fromtime, us.totime from schedule us left join GroupSchedule gd on us.groupid = gd.id";
+                        MySqlCommand cmd = new MySqlCommand(sql, conn);
+                        using (MySqlDataReader rdr = cmd.ExecuteReader())
+                        {
+                            while (rdr.Read())
+                            {
+                                string class_ge = "table-primary";
+                                var groupuser = rdr.GetString(8).ToLower();
+                                class_ge = groupuser.IndexOf("blue") != -1 ? "table-primary" : groupuser.IndexOf("yellow") != -1 ? "table-warning" : groupuser.IndexOf("pink") != -1 ? "table-danger" : groupuser.IndexOf("green") != -1 ? "table-success" : groupuser.IndexOf("hsc") != -1 ? "table-secondary" : "table-light";
+
+                                <tr class="@class_ge">
+                                    <th scope="row">@rdr.GetInt32(0).ToString()</th>
+                                    <td> @rdr.GetString(1)</td>
+                                    <td> @rdr.GetString(8)</td>
+                                    <td> @rdr.GetString(2)</td>
+                                    <td> @rdr.GetString(3)</td>
+                                    <td> @rdr.GetString(4)</td>
+                                    <td> @rdr.GetString(5)</td>
+                                    <td> @rdr.GetString(7)</td>
+                                    <td> @rdr.GetDateTime(6).ToString("dd/MM/yyyy")</td>
+                                    <td> @rdr.GetString(9)</td>
+                                    <td> @rdr.GetString(10)</td>
+                                    <td>
+                                        <form id="Delete" method="post">
+                                        <input type="hidden" name="Id" value="@rdr.GetInt32(0).ToString()" />
+                                            <button type="submit" class="btn btn-success" value="Edit" asp-page-handler="Edit">Edit</button>
+                                        <button type="submit" class="btn btn-danger" value="Delete" asp-page-handler="Delete">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(function () {
+            $('#datetimepicker1').datepicker();
+            $('#choices-multiple-remove-button').formSelect();
+            $('#choices-multiple-remove-button.select_all').siblings('ul').prepend('<li id=sm_select_all><span>Select All</span></li>');
+            $('li#sm_select_all').on('click', function () {
+                var jq_elem = $(this),
+                    jq_elem_span = jq_elem.find('span'),
+                    select_all = jq_elem_span.text() == 'Select All',
+                    set_text = select_all ? 'Select None' : 'Select All';
+                jq_elem_span.text(set_text);
+                jq_elem.siblings('li').filter(function () {
+                    return $(this).find('input').prop('checked') != select_all;
+                }).click();
+            });
+
+        })
+    </script>
+}

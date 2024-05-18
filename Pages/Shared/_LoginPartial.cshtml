@@ -1,0 +1,17 @@
+﻿@using Microsoft.AspNetCore.Identity
+
+ @inject IHttpContextAccessor _httpContext
+<ul class="navbar-nav">
+    @{
+        var userNameAdmin = _httpContext.HttpContext.Session.GetString("AdminUserName");
+        var userName = _httpContext.HttpContext.Session.GetString("UserName");
+        var staff = _httpContext.HttpContext.Session.GetString("Staff");
+    }
+    @if (!string.IsNullOrEmpty(userNameAdmin) || !string.IsNullOrEmpty(userName) || !string.IsNullOrEmpty(staff))
+    {
+    <li class="nav-item">
+        <a asp-area="" asp-page="/Logout" class="nav-link text-danger">Logout</a>
+
+    </li>
+    }
+</ul>
