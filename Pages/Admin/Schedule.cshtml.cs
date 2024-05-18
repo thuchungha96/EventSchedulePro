@@ -139,29 +139,6 @@ namespace EventSchedulePro.Pages.Admin
                         }
                     }
                 }
-                /*
-                using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
-                {
-                    conn.Open();
-                    string myInsertQuery = "";
-                    if (String.IsNullOrEmpty(Input.Id))
-                    {
-                        myInsertQuery = $"insert into schedule(name,date,groupid,activity,staff,studentLeader,Note,Location,fromtime,totime,StaffNames) values ('{Input.Name}','{DateTime.Parse(Input.TimeSchedule).ToString("yyyy-MM-dd")}',{Input.Group},N'{Input.Activity}',N'{stafidList}',N'{Input.Leader}',N'{Input.Note}',N'{Input.Location}',N'{Input.FromTime}',N'{Input.ToTime}',N'{staffname}')";
-                    }
-                    else
-                    {
-                        CultureInfo enUS = new CultureInfo("en-US");
-                        DateTime dateValue;
-                        if (DateTime.TryParseExact(Input.TimeSchedule, "dd/MM/yyyy", enUS,
-                                  DateTimeStyles.None, out dateValue))
-                        {
-                            myInsertQuery = $"update schedule set name=N'{Input.Name}', date='{dateValue.ToString("yyyy-MM-dd")}', groupid={Input.Group},activity = N'{Input.Activity}', staff =N'{stafidList}', studentLeader=N'{Input.Leader}', Note= N'{Input.Note}', " +
-                                $"Location= N'{Input.Location}',fromtime =N'{Input.FromTime}',totime=N'{Input.ToTime}',StaffNames=N'{staffname}' where id = {Input.Id}   ";
-                        }
-                    }
-                    MySqlCommand myCommand = new MySqlCommand(myInsertQuery, conn);
-                    myCommand.ExecuteNonQuery();
-                } */
             }
             catch (Exception ex)
             {
@@ -229,25 +206,6 @@ namespace EventSchedulePro.Pages.Admin
                 }
             }
             return Page();
-        }
-        private string getStaffName(string listId)
-        {
-            string username = "";
-            using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
-            {
-                conn.Open();
-                string sql = $"SELECT Username FROM user where id in ({listId})";
-                MySqlCommand cmd = new MySqlCommand(sql, conn);
-                using (MySqlDataReader rdr = cmd.ExecuteReader())
-                {
-                    while (rdr.Read())
-                    {
-                        username+= @rdr.GetString(0) +", ";
-
-                    }
-                }
-            }
-            return username;
         }
     }
 }
