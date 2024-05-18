@@ -1,3 +1,4 @@
+using EventSchedulePro.Data.Context;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -7,46 +8,22 @@ using System.ComponentModel.DataAnnotations;
 namespace EventSchedulePro.Pages.Admin
 {
     public class GroupModel : PageModel
-    {        /// <summary>
-             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-             ///     directly from your code. This API may change or be removed in future releases.
-             /// </summary>
+    { 
         [BindProperty]
         public InputModel Input { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public IList<AuthenticationScheme> ExternalLogins { get; set; }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public string ReturnUrl { get; set; }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        [TempData]
-        public string ErrorMessage { get; set; }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [Required]
             public string Username { get; set; }
             [Required]
             public List<string> GroupList { get; set; }
+        }
+
+        public readonly EventDBContext _context;
+        public GroupModel(EventDBContext context)
+        {
+            _context = context;
         }
         public IActionResult OnGet()
         {
@@ -66,36 +43,27 @@ namespace EventSchedulePro.Pages.Admin
         {
             returnUrl ??= Url.Content("~/");
             if (Input.Username.CompareTo("Select user") != 0)
-                using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
             {
-                    string GroupIdList = (Input.GroupList != null && Input.GroupList.Any()) ? string.Join(",", Input.GroupList) : "";
-                    if (string.IsNullOrEmpty(GroupIdList)) return Page();
-                    string GroupName = !string.IsNullOrEmpty(GroupIdList) ? getGroupName(GroupIdList) : "";
-                    conn.Open();
-                string myInsertQuery = $"update user set GroupIds ='{GroupIdList}', GroupNames=N'{GroupName}' where id = '{Input.Username}'";
-                MySqlCommand myCommand = new MySqlCommand(myInsertQuery, conn);
-                myCommand.ExecuteNonQuery();
-            }
-            return Page();
-        }
-        private string getGroupName(string listId)
-        {
-            string groupname = "";
-            using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
-            {
-                conn.Open();
-                string sql = $"SELECT name FROM groupschedule where id in ({listId})";
-                MySqlCommand cmd = new MySqlCommand(sql, conn);
-                using (MySqlDataReader rdr = cmd.ExecuteReader())
+                try
                 {
-                    while (rdr.Read())
+                    var staff = _context.Staffs.FirstOrDefault(x => x.Id == int.Parse(Input.Username));
+                    if (staff != null)
                     {
-                        groupname += @rdr.GetString(0) + ", ";
-
+                        var GroupList = _context.Groups.Where(x => Input.GroupList.Contains(x.Id.ToString())).ToList();
+                        if (GroupList.Any())
+                        {
+                            staff.GroupIds = string.Join(", ", GroupList.Select(x => x.Id.ToString()).ToArray());
+                            staff.GroupNames = string.Join(", ", GroupList.Select(x => x.Name.ToString()).ToArray());
+                            await _context.SaveChangesAsync();
+                        }
                     }
                 }
-            }
-            return groupname;
+                catch (Exception)
+                {
+
+                }
+            }   
+            return Page();
         }
     }
 }

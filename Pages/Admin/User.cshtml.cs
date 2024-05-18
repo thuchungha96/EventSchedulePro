@@ -1,3 +1,5 @@
+using EventSchedulePro.Data.Class;
+using EventSchedulePro.Data.Context;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -7,62 +9,33 @@ using System.ComponentModel.DataAnnotations;
 namespace EventSchedulePro.Pages.Admin
 {
     public class UserModel : PageModel
-    {        /// <summary>
-             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-             ///     directly from your code. This API may change or be removed in future releases.
-             /// </summary>
+    {
         [BindProperty]
         public InputModel Input { get; set; }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public IList<AuthenticationScheme> ExternalLogins { get; set; }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public string ReturnUrl { get; set; }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [TempData]
         public string ErrorMessage { get; set; }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
+         
             [Required]
             public string Username { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
             [DataType(DataType.Password)]
             public string Password { get; set; }
-
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
+       
             [Display(Name = "Remember me?")]
             public bool RememberMe { get; set; }
         }
+
+        public readonly EventDBContext _context;
+        public UserModel(EventDBContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult OnGet()
         {
+
             var userName = HttpContext.Session.GetString("AdminUserName");
             if (string.IsNullOrEmpty(userName)){
                 return new RedirectToPageResult("/Admin/Login");
@@ -75,53 +48,44 @@ namespace EventSchedulePro.Pages.Admin
             return System.Convert.ToBase64String(plainTextBytes);
         }
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
-        {
+        {           
             returnUrl ??= Url.Content("~/");
-            Input.Password = "1";
-            if (!checkexit(Input.Username))
+            ErrorMessage = "";
+            if (!string.IsNullOrEmpty(Input.Username))
             {
-
-                using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                var staff = _context.Staffs.FirstOrDefault(x => x.UserName == Input.Username);
+                // staff != null then that staff aready exited in database.
+                if (staff == null)
                 {
-                    conn.Open();
-                    string myInsertQuery = $"INSERT INTO user (username,groupid,roleuser,passwordhash) VALUES ('{Input.Username}',0,1,'{Base64Encode(Input.Password)}')";
-                    MySqlCommand myCommand = new MySqlCommand(myInsertQuery, conn);
-                    myCommand.ExecuteNonQuery();
+
+                    Staff newStaff = new Staff { UserName = Input.Username, GroupID = 0, RoleUser = "1", PasswordHash = Base64Encode("1") };
+                    _context.Add(newStaff);
+                    await _context.SaveChangesAsync();
+                } else
+                {
+                    ErrorMessage = $"[{Input.Username}] Already Exited!";
                 }
+            }
+           
+            if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                ModelState.AddModelError(string.Empty, ErrorMessage);
             }
             return Page();
         }
-        private bool checkexit(string Username)
-        {
-            using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
-            {
-                conn.Open();
-                string sql = "SELECT * from user where Username ='" + Username + "'";
-                MySqlCommand cmd = new MySqlCommand(sql, conn);
-                using (MySqlDataReader rdr = cmd.ExecuteReader())
-                {
-                    while (rdr.Read())
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
+
         [HttpPost("Delete")]
         public async Task<IActionResult> OnPostDeleteAsync(string Id = null)
         {
             if (Id != null)
-            {
+            {             
                 try
                 {
-                    int id = int.Parse(Id);
-                    using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                    var staff = _context.Staffs.FirstOrDefault(x => x.Id == int.Parse(Id));
+                    if (staff != null)
                     {
-                        conn.Open();
-                        string myInsertQuery = $"delete from user where id = {id}";
-                        MySqlCommand myCommand = new MySqlCommand(myInsertQuery, conn);
-                        myCommand.ExecuteNonQuery();
+                        _context.Remove(staff);
+                        await _context.SaveChangesAsync();
                     }
 
                 }

@@ -1,6 +1,8 @@
 ﻿@page
 @model EventSchedulePro.Pages.Admin.UserModel
+@using EventSchedulePro.Data.Context
 @using MySql.Data.MySqlClient
+@inject EventDBContext _context;
 @inject IHttpContextAccessor _httpContext
 @{
     var userName = _httpContext.HttpContext.Session.GetString("AdminUserName");
@@ -42,29 +44,23 @@
             </thead>
             <tbody>
                 @{
-
-                    using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                    var StaffList = _context.Staffs.Where(x => x.RoleUser == null || x.RoleUser.CompareTo("3") != 0).ToList();
+                    if (StaffList.Any())
                     {
-                        conn.Open();
-                        string sql = "SELECT * from user where  RoleUser <> 3";
-                        MySqlCommand cmd = new MySqlCommand(sql, conn);
-                        using (MySqlDataReader rdr = cmd.ExecuteReader())
+                        foreach(var staff in StaffList)
                         {
-                            while (rdr.Read())
-                            {
-                                <tr>
-                                    <th scope="row">@rdr.GetInt32(0).ToString()</th>
-                                    <td> @rdr.GetString(1)</td>
-                                    <td>
-                                        <form id="Delete" method="post">
-                                            <input type="hidden" name="Id" value="@rdr.GetInt32(0).ToString()" />
-                                            <button type="submit" class="btn btn-danger" value="Delete" asp-page-handler="Delete">Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            }
+                            <tr>
+                                <th scope="row">@staff.Id</th>
+                                <td> @staff.UserName</td>
+                                <td>
+                                    <form id="Delete" method="post">
+                                        <input type="hidden" name="Id" value="@staff.Id" />
+                                        <button type="submit" class="btn btn-danger" value="Delete" asp-page-handler="Delete">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
                         }
-                    }
+                    }        
                 }
                
             </tbody>

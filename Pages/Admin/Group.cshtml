@@ -1,8 +1,23 @@
 ﻿@page
 @model EventSchedulePro.Pages.Admin.GroupModel
+@using EventSchedulePro.Data.Context
 @using MySql.Data.MySqlClient
 @inject IHttpContextAccessor _httpContext
+@inject EventDBContext _context;
 @{
+    var StaffList = _context.Staffs.Where(x => x.RoleUser == null || x.RoleUser.CompareTo("3") != 0).ToList();
+    var GroupList = _context.Groups.ToList();
+    var StaffGroup = (from sf in _context.Staffs
+                      join grj in _context.Groups on sf.GroupID equals grj.Id into grs
+                      from gr in grs.DefaultIfEmpty()
+                     select new
+                     {
+                        id = sf.Id,
+                        userName = sf.UserName,
+                        name = gr != null ? "None" : gr.Name,
+                        groupnames = String.IsNullOrEmpty(sf.GroupNames) ? "None" : sf.GroupNames
+                     }).ToList();
+    
 }
 <div class="row">
     <div class="col-md-4">
@@ -14,21 +29,13 @@
                     <select asp-for="Input.Username" class="form-select" aria-label="Default select example">
                         <option selected id="-1">Select user</option>
                         @{
-
-                            using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                            if (StaffList.Any())
                             {
-                                conn.Open();
-                                string sql = "SELECT * from user where  RoleUser <> 3";
-                                MySqlCommand cmd = new MySqlCommand(sql, conn);
-                                using (MySqlDataReader rdr = cmd.ExecuteReader())
+                                foreach (var staff in StaffList)
                                 {
-                                    while (rdr.Read())
-                                    {
-                                        <option value=@rdr.GetInt32(0).ToString()>@rdr.GetString(1)</option>
-                                      
-                                    }
+                                    <option value=@staff.Id>@staff.UserName</option>
                                 }
-                            }
+                            }                       
                         }
                     </select>
                     <label asp-for="Input.Username" class="form-label">UserName</label>
@@ -37,19 +44,11 @@
                 <div class="form-floating mb-3">
                     <select id="choices-multiple-remove-button" class="select_all" multiple asp-for="Input.GroupList">
                         @{
-
-                            using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                            if (GroupList.Any())
                             {
-                                conn.Open();
-                                string sql = "SELECT * from GroupSchedule";
-                                MySqlCommand cmd = new MySqlCommand(sql, conn);
-                                using (MySqlDataReader rdr = cmd.ExecuteReader())
+                                foreach (var group in GroupList)
                                 {
-                                    while (rdr.Read())
-                                    {
-                                        <option value=@rdr.GetInt32(0).ToString()>@rdr.GetString(1)</option>
-
-                                    }
+                                    <option value=@group.Id>@group.Name</option>
                                 }
                             }
                         }
@@ -75,70 +74,54 @@
             </thead>
             <tbody>
                 @{
-
-                    using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                    if (StaffGroup.Any())
                     {
-                        conn.Open();
-                        string sql = "select us.id,us.username, CASE WHEN gd.id IS NULL THEN 'None' ELSE gd.name END AS name,CASE WHEN  us.groupnames IS NULL THEN 'None' ELSE  us.groupnames END AS groupnames from user us left join GroupSchedule gd on us.groupid = gd.id";
-                        MySqlCommand cmd = new MySqlCommand(sql, conn);
-                        using (MySqlDataReader rdr = cmd.ExecuteReader())
+                        foreach (var item in StaffGroup)
                         {
-                            while (rdr.Read())
-                            {
-                                string class_ge = "table-primary";
-                                var groupuser = rdr.GetString(2).ToLower();
-                                class_ge = groupuser.IndexOf("blue") != -1 ? "table-primary" : groupuser.IndexOf("yellow") != -1 ? "table-warning" : groupuser.IndexOf("pink") != -1 ? "table-danger" : groupuser.IndexOf("green") != -1 ? "table-success" : groupuser.IndexOf("hsc") != -1 ? "table-secondary" : "table-light";
-                               /* tbutton = tbutton.Replace("Blue", "<button type=\"button\" class=\"btn btn-outline-primary\">Blue</button>");
-                                tbutton = tbutton.Replace("Yellow", "<button type=\"button\" class=\"btn btn-outline-warning\">Yellow</button>");
-                                tbutton = tbutton.Replace("Pink", "<button type=\"button\" class=\"btn btn-outline-danger\">Pink</button>");
-                                tbutton = tbutton.Replace("Green", "<button type=\"button\" class=\"btn btn-outline-success\">Green</button>");
-                                tbutton = tbutton.Replace("HSC ", "<button type=\"button\" class=\"btn btn-outline-secondary\">HSC</button>");
-                                */
-                                var tbutton = @rdr.GetString(3).Replace(" ", "").Split(",");
-                                bool tbuttonx = false;
-                                <tr>
-                                    <th scope="row">@rdr.GetInt32(0).ToString()</th>
-                                    <td> @rdr.GetString(1)</td>
-                                    <td>
-                                        @if (tbutton.Length > 0)
-                                        {
+                            var tbutton = item.groupnames.Replace(" ", "").Split(",");
+                            bool tbuttonx = false;
+                            <tr>
+                                <th scope="row">@item.id</th>
+                                <td> @item.userName</td>
+                                <td>
+                                    @if (tbutton.Length > 0)
+                                    {
 
-                                            foreach (var item in tbutton)
+                                        foreach (var itemBut in tbutton)
+                                        {
+                                            if (itemBut == "Blue")
                                             {
-                                                if (item == "Blue")
-                                                {
-                                                    <button type="button" class="btn btn-outline-primary">Blue</button>
-                                                    tbuttonx = true;
-                                                }
-                                                if (item ==  "Yellow")
-                                                {
-                                                    <button type="button" class="btn btn-outline-warning">Yellow</button>
-                                                    tbuttonx = true;
-                                                }
-                                                if (item == "Pink")
-                                                {
-                                                    <button type="button" class="btn btn-outline-danger">Pink</button>
-                                                    tbuttonx = true;
-                                                }
-                                                if (item == "Green")
-                                                {
-                                                    <button type="button" class="btn btn-outline-success">Green</button>
-                                                    tbuttonx = true;
-                                                }
-                                                if (item == "HSC")
-                                                {
-                                                    <button type="button" class="btn btn-outline-secondary">HSC</button>
-                                                    tbuttonx = true;
-                                                }
-                                          }
-                                            if (!tbuttonx)
+                                                <button type="button" class="btn btn-outline-primary">Blue</button>
+                                                tbuttonx = true;
+                                            }
+                                            if (itemBut == "Yellow")
                                             {
-                                                <button type="button" class="btn btn-outline-dark">None</button>
-                                          }
+                                                <button type="button" class="btn btn-outline-warning">Yellow</button>
+                                                tbuttonx = true;
+                                            }
+                                            if (itemBut == "Pink")
+                                            {
+                                                <button type="button" class="btn btn-outline-danger">Pink</button>
+                                                tbuttonx = true;
+                                            }
+                                            if (itemBut == "Green")
+                                            {
+                                                <button type="button" class="btn btn-outline-success">Green</button>
+                                                tbuttonx = true;
+                                            }
+                                            if (itemBut == "HSC")
+                                            {
+                                                <button type="button" class="btn btn-outline-secondary">HSC</button>
+                                                tbuttonx = true;
+                                            }
                                         }
-                                    </td>
-                                </tr>
-                            }
+                                        if (!tbuttonx)
+                                        {
+                                            <button type="button" class="btn btn-outline-dark">None</button>
+                                        }
+                                    }
+                                </td>
+                            </tr>
                         }
                     }
                 }

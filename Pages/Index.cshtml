@@ -1,11 +1,47 @@
 ﻿@page
 @model IndexModel
+@using EventSchedulePro.Data.Context
 @using MySql.Data.MySqlClient
 @inject IHttpContextAccessor _httpContext
+@inject EventDBContext _context;
 @{
     var userName = _httpContext.HttpContext.Session.GetString("AdminUserName");
     var userGroup = _httpContext.HttpContext.Session.GetString("UserGroupId");
     ViewData["Title"] = "Home Schedule";
+    var EventSchedules = (from sc in _context.Schedules
+                          join grj in _context.Groups on sc.GroupID ?? "" equals grj.Id.ToString() into grs
+                          from gr in grs.DefaultIfEmpty()
+                          select new
+                          {
+                              id = sc.Id,
+                              name = sc.Name,
+                              activity = sc.Activity ?? "",
+                              studentLeader = sc.StudentLeader ?? "",
+                              note = sc.Note ?? "",
+                              date = sc.Date,
+                              location = sc.Location,
+                              groupName = gr != null ? "None" : gr.Name,
+                              groupId = sc.GroupID,
+                              fromTime = sc.FromTime ?? "",
+                              toTime = sc.ToTime ?? "",
+                              StaffNames = sc.StaffNames
+                          }).ToList();
+    if (EventSchedules.Any())
+    {
+        var staff = _httpContext.HttpContext.Request.Query["Staff"];
+        if (!String.IsNullOrEmpty(staff))
+        {
+            EventSchedules = EventSchedules.Where(x => x.StaffNames.Contains(staff) || x.groupName.Contains("all")).ToList();
+        }
+        else
+        {
+            if (!String.IsNullOrEmpty(userGroup) && String.IsNullOrEmpty(userName))
+            {
+                EventSchedules = EventSchedules.Where(x => userGroup.Contains(x.groupId) || x.groupName.Contains("all")).ToList();
+            }
+        }
+    }
+
 }
 
 <center>
@@ -34,50 +70,30 @@
             </thead>
             <tbody>
                 @{
-
-                    using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                    if (EventSchedules.Any())
                     {
-                        conn.Open();
-                        string sql = "select us.id, us.name, us.Activity, us.StaffNames, us.StudentLeader, us.Note, us.Date, us.Location, CASE WHEN gd.id IS NULL THEN 'None' ELSE gd.name END AS name, us.fromtime, us.totime from schedule us left join GroupSchedule gd on us.groupid = gd.id";
+                        foreach (var item in EventSchedules)
+                        {
+                            string class_ge = "table-primary";
+                            var groupuser = @item.groupName.ToLower();
+                            class_ge = groupuser.IndexOf("blue") != -1 ? "btn btn-outline-primary" : groupuser.IndexOf("yellow") != -1 ? "btn btn-outline-warning" : groupuser.IndexOf("pink") != -1 ? "btn btn-outline-danger" : groupuser.IndexOf("green") != -1 ? "btn btn-outline-success" : groupuser.IndexOf("hsc") != -1 ? "btn btn-outline-secondary" : "btn btn-outline-dark";
+                            <tr>
+                                <td>
+                                    @item.fromTime + " - " @item.toTime
 
-                        var staff = _httpContext.HttpContext.Request.Query["Staff"];
-                        if (!String.IsNullOrEmpty(staff))
-                        {
-                            sql += $" where us.StaffNames like '%{staff}%' OR gd.name like '%all%'";
+                                </td>
+                                <td>
+                                    @item.name<Br />
+                                    Activity: <b>@item.activity</b>
+                                    <Br />Notes: <a>@item.note</a>
+                                    <Br />Staff: <a style="color:deepskyblue">@item.StaffNames</a>
+                                    <Br />Student Leaders: <a style="color:green">@item.studentLeader</a>
+                                </td>
+                                <td><center><button class="@class_ge" style="">@item.groupName</button></center></td>
+                                <td> @item.location</td>
+                            </tr>
                         }
-                        else
-                        {
-                            if (!String.IsNullOrEmpty(userGroup) && String.IsNullOrEmpty(userName))
-                            {
-                                sql += $" where us.groupid in({userGroup}) OR gd.name like '%all%'";
-                            }
-                        }
-                        MySqlCommand cmd = new MySqlCommand(sql, conn);
-                        using (MySqlDataReader rdr = cmd.ExecuteReader())
-                        {
-                            while (rdr.Read())
-                            {
-                                string class_ge = "table-primary";
-                                var groupuser = rdr.GetString(8).ToLower();
-                                class_ge = groupuser.IndexOf("blue") != -1 ? "btn btn-outline-primary" : groupuser.IndexOf("yellow") != -1 ? "btn btn-outline-warning" : groupuser.IndexOf("pink") != -1 ? "btn btn-outline-danger" : groupuser.IndexOf("green") != -1 ? "btn btn-outline-success" : groupuser.IndexOf("hsc") != -1 ? "btn btn-outline-secondary" : "btn btn-outline-dark";
-                                <tr>
-                                    <td> <!--@rdr.GetDateTime(6).ToString("dd/MM/yyyy")<br />-->
-                                    @rdr.GetString(9) - @rdr.GetString(10)
-                                    
-                                    </td>
-                                    <td>
-                                        @rdr.GetString(1)<Br/>
-                                        Activity: <b>@rdr.GetString(2)</b>
-                                        <Br />Notes: <a>@rdr.GetString(5)</a>
-                                        <Br />Staff: <a style="color:deepskyblue">@rdr.GetString(3)</a>
-                                        <Br />Student Leaders: <a style="color:green">@rdr.GetString(4)</a>                                                                                                         
-                                    </td>
-                                    <td><center><button class="@class_ge" style="">@rdr.GetString(8)</button></center></td>
-                                    <td> @rdr.GetString(7)</td>
-                                </tr>
-                            }
-                        }
-                    }
+                   }                
                 }
 
             </tbody>
