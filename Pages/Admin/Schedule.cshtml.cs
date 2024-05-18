@@ -98,7 +98,7 @@ namespace EventSchedulePro.Pages.Admin
                 {
                     Schedule t = new Schedule
                     {
-                        Name = "",
+                        Name = Input.Name,
                         Date = Input.TimeSchedule,// DateTime.Parse(Input.TimeSchedule),
                         GroupID = Input.Group,
                         Activity = Input.Activity,
