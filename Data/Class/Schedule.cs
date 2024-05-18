@@ -20,7 +20,7 @@ namespace EventSchedulePro.Data.Class
         /// <summary>
         /// Date of Event
         /// </summary>
-        public DateTime? Date { get; set; }
+        public string? Date { get; set; }
 
         /// <summary>
         /// Course Name

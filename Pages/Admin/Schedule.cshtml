@@ -1,8 +1,30 @@
 ﻿@page
 @model EventSchedulePro.Pages.Admin.ScheduleModel
+@using EventSchedulePro.Data.Context
 @using MySql.Data.MySqlClient
 @inject IHttpContextAccessor _httpContext
+@inject EventDBContext _context;
 @{
+    var StaffList = _context.Staffs.Where(x => x.RoleUser == null || x.RoleUser.CompareTo("3") != 0).ToList();
+    var GroupList = _context.Groups.ToList();
+    var EventSchedules = (from sc in _context.Schedules
+                          join grj in _context.Groups on sc.GroupID ?? "" equals grj.Id.ToString() into grs
+                          from gr in grs.DefaultIfEmpty()
+                          select new
+                          {
+                              id = sc.Id,
+                              name = sc.Name,
+                              activity = sc.Activity ?? "",
+                              studentLeader = sc.StudentLeader ?? "",
+                              note = sc.Note ?? "",
+                              date = sc.Date,
+                              location = sc.Location,
+                              groupName = gr != null ? gr.Name : "None",
+                              groupId = sc.GroupID,
+                              fromTime = sc.FromTime ?? "",
+                              toTime = sc.ToTime ?? "",
+                              StaffNames = sc.StaffNames
+                          }).ToList();
 }
 <div class="row">
     <div class="col-md-3">
@@ -18,19 +40,11 @@
                     <select asp-for="Input.Group" class="form-select " aria-label="Default select example">
                         <option selected id="-1">Select group</option>
                         @{
-
-                            using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                            if (GroupList.Any())
                             {
-                                conn.Open();
-                                string sql = "SELECT * from GroupSchedule";
-                                MySqlCommand cmd = new MySqlCommand(sql, conn);
-                                using (MySqlDataReader rdr = cmd.ExecuteReader())
+                                foreach (var group in GroupList)
                                 {
-                                    while (rdr.Read())
-                                    {
-                                        <option value=@rdr.GetInt32(0).ToString()>@rdr.GetString(1)</option>
-
-                                    }
+                                    <option value=@group.Id>@group.Name</option>
                                 }
                             }
                         }
@@ -52,19 +66,11 @@
                   <!--  <input asp-for="Input.Staff" class="form-control" autocomplete="Staff" aria-required="true" placeholder="Staff" /> -->
                     <select id="choices-multiple-remove-button" class="select_all" multiple asp-for="Input.Stafff">
                         @{
-
-                            using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                            if (StaffList.Any())
                             {
-                                conn.Open();
-                                string sql = "SELECT * from User";
-                                MySqlCommand cmd = new MySqlCommand(sql, conn);
-                                using (MySqlDataReader rdr = cmd.ExecuteReader())
+                                foreach (var staff in StaffList)
                                 {
-                                    while (rdr.Read())
-                                    {
-                                        <option value=@rdr.GetInt32(0).ToString()>@rdr.GetString(1)</option>
-
-                                    }
+                                    <option value=@staff.Id>@staff.UserName</option>
                                 }
                             }
                         }
@@ -173,43 +179,36 @@
             </thead>
             <tbody>
                 @{
-
-                    using (MySqlConnection conn = new MySqlConnection("server=104.238.129.230;uid=jinzschedule;pwd=Metmoivl@123.@124!;database=jinzschedule;connect Timeout=30"))
+                    if (EventSchedules.Any())
                     {
-                        conn.Open();
-                        string sql = "select us.id, us.name, us.Activity, us.StaffNames, us.StudentLeader, us.Note, us.Date, us.Location, CASE WHEN gd.id IS NULL THEN 'None' ELSE gd.name END AS name, us.fromtime, us.totime from schedule us left join GroupSchedule gd on us.groupid = gd.id";
-                        MySqlCommand cmd = new MySqlCommand(sql, conn);
-                        using (MySqlDataReader rdr = cmd.ExecuteReader())
+                        foreach (var item in EventSchedules)
                         {
-                            while (rdr.Read())
-                            {
-                                string class_ge = "table-primary";
-                                var groupuser = rdr.GetString(8).ToLower();
-                                class_ge = groupuser.IndexOf("blue") != -1 ? "table-primary" : groupuser.IndexOf("yellow") != -1 ? "table-warning" : groupuser.IndexOf("pink") != -1 ? "table-danger" : groupuser.IndexOf("green") != -1 ? "table-success" : groupuser.IndexOf("hsc") != -1 ? "table-secondary" : "table-light";
-
-                                <tr class="@class_ge">
-                                    <th scope="row">@rdr.GetInt32(0).ToString()</th>
-                                    <td> @rdr.GetString(1)</td>
-                                    <td> @rdr.GetString(8)</td>
-                                    <td> @rdr.GetString(2)</td>
-                                    <td> @rdr.GetString(3)</td>
-                                    <td> @rdr.GetString(4)</td>
-                                    <td> @rdr.GetString(5)</td>
-                                    <td> @rdr.GetString(7)</td>
-                                    <td> @rdr.GetDateTime(6).ToString("dd/MM/yyyy")</td>
-                                    <td> @rdr.GetString(9)</td>
-                                    <td> @rdr.GetString(10)</td>
-                                    <td>
-                                        <form id="Delete" method="post">
-                                        <input type="hidden" name="Id" value="@rdr.GetInt32(0).ToString()" />
-                                            <button type="submit" class="btn btn-success" value="Edit" asp-page-handler="Edit">Edit</button>
+                            string class_ge = "table-primary";
+                            var groupuser = @item.groupName.ToLower();
+                            class_ge = groupuser.IndexOf("blue") != -1 ? "btn btn-outline-primary" : groupuser.IndexOf("yellow") != -1 ? "btn btn-outline-warning" : groupuser.IndexOf("pink") != -1 ? "btn btn-outline-danger" : groupuser.IndexOf("green") != -1 ? "btn btn-outline-success" : groupuser.IndexOf("hsc") != -1 ? "btn btn-outline-secondary" : "btn btn-outline-dark";
+                            <tr>
+                                <td scope="row">@item.id</td>
+                                <td> @item.name</td>
+                                <td> @item.groupName</td>
+                                <td> @item.activity</td>
+                                <td> @item.StaffNames</td>
+                                <td>@item.studentLeader</td>
+                                <td> @item.note</td>
+                                <td> @item.location</td>
+                                <td> @item.date</td>
+                                <td> @item.fromTime</td>
+                                <td> @item.toTime</td>
+                                <td>
+                                    <form id="Delete" method="post">
+                                        <input type="hidden" name="Id" value="@item.id" />
+                                        <button type="submit" class="btn btn-success" value="Edit" asp-page-handler="Edit">Edit</button>
                                         <button type="submit" class="btn btn-danger" value="Delete" asp-page-handler="Delete">Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            }
+                                    </form>
+                                </td>
+                            </tr>
+
                         }
-                    }
+                   }            
                 }
 
             </tbody>

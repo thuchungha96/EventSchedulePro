@@ -20,7 +20,7 @@
                               note = sc.Note ?? "",
                               date = sc.Date,
                               location = sc.Location,
-                              groupName = gr != null ? "None" : gr.Name,
+                              groupName = gr != null ? gr.Name : "None",
                               groupId = sc.GroupID,
                               fromTime = sc.FromTime ?? "",
                               toTime = sc.ToTime ?? "",
@@ -79,7 +79,7 @@
                             class_ge = groupuser.IndexOf("blue") != -1 ? "btn btn-outline-primary" : groupuser.IndexOf("yellow") != -1 ? "btn btn-outline-warning" : groupuser.IndexOf("pink") != -1 ? "btn btn-outline-danger" : groupuser.IndexOf("green") != -1 ? "btn btn-outline-success" : groupuser.IndexOf("hsc") != -1 ? "btn btn-outline-secondary" : "btn btn-outline-dark";
                             <tr>
                                 <td>
-                                    @item.fromTime + " - " @item.toTime
+                                    @item.fromTime - @item.toTime
 
                                 </td>
                                 <td>

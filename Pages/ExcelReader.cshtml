@@ -14,49 +14,6 @@
 </div>
 </form>
 </div>
-<!--
-    <div class="col-md-10">
-       @{
-            var asd = @ViewData["Exceptiona"] != null ? @ViewData["Exceptiona"]?.ToString() : "";
-       }
-        @asd
-        <table class="table">
-            <thead>
-                <tr>
-
-
-        @{
-            var t =(List<List<object>>)ViewData["ExcelData"];
-            if (t != null && t.Count > 0)
-            {
-                @foreach(var header in t[0])
-                {
-                    <th>@header</th>
-                }
-            }
-        }
-                </tr>
-            </thead>
-            <tbody>
-
-                @{
-                    if (t != null && t.Count > 0)
-                    {
-                        @for (int i=1; i<t.Count(); i++)
-                        {
-                            <tr>
-                            @foreach (var cell in t[i])
-                            {
-                            <td>@cell</td>
-                        }
-                            </tr>
-                        }
-                    }
-                }
-            </tbody>
-        </table>
-    </div>
-        -->
     @{
         var tlist = (List<List<object>>)ViewData["ExcelData"];
     }

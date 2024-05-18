@@ -33,7 +33,7 @@ namespace EventSchedulePro.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Name = table.Column<string>(type: "text", nullable: true),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Date = table.Column<string>(type: "text", nullable: true),
                     Course = table.Column<string>(type: "text", nullable: true),
                     Season = table.Column<string>(type: "text", nullable: true),
                     GroupID = table.Column<string>(type: "text", nullable: true),
