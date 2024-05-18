@@ -16,7 +16,7 @@ namespace EventSchedulePro.Data.Class
         /// Username
         /// </summary>
         [Required]
-        public required string UserName { get; set; }
+        public string UserName { get; set; }
 
         /// <summary>
         /// Group single ID
@@ -32,7 +32,7 @@ namespace EventSchedulePro.Data.Class
         /// User 
         /// </summary>
         [Required]
-        public required string PasswordHash { get; set; }
+        public string PasswordHash { get; set; }
 
         /// <summary>
         /// List Group Id

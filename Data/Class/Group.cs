@@ -16,7 +16,7 @@ namespace EventSchedulePro.Data.Class
         /// Group Name
         /// </summary>
         [Required]
-        public required string Name { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Group Detail, not required
