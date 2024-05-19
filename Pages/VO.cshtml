@@ -1,12 +1,15 @@
 ﻿@page
+@using EventSchedulePro.Data.Context
 @model EventSchedulePro.Pages.VOModel
+@inject EventDBContext _context;
 @{
+    var IPOContext = _context.Contents.OrderByDescending(x => x.CreateTime).FirstOrDefault(x => x.Type.CompareTo("VO") == 0);
 }
- <div class="row">
-    <h1 class="page-title">Virtual Orientation (VO)</h1>
-  
-  
-  
+
+@if (IPOContext != null)
+    @Html.Raw(IPOContext.ContentHTML?.ToString())
+
+<!--
     <p>You are attending virtual orientation (VO) as a current GRC student and Student Leader to help us provide a warm virtual welcome to new students.&nbsp; You may be assigned to present content, monitor chat and will be hosting a Peer Mentor breakout room.&nbsp; You all are expected to be "present" and available during VO to:</p>
 <ul>
 <li>Answer questions</li>
@@ -91,4 +94,4 @@
         </li>
     </ol>
 
-</div> 
+</div> -->

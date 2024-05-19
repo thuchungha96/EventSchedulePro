@@ -1,0 +1,31 @@
+﻿@page
+@model EventSchedulePro.Pages.Admin.EditVOModel
+@{
+}
+<div class="col-md-12">
+    <section>
+        <form id="fintstaff" method="post">
+
+            <div class="form-floating mb-3">
+                <textarea id="tiny" asp-for="Input.MultiHTML"></textarea>
+            </div>
+            <div>
+                <button id="find-staff-submit" type="submit" class="w-100 btn btn-success" asp-page-handler="FindStaff">Submit VO Content</button>
+            </div>
+        </form>
+    </section>
+</div>
+
+
+@section scripts {
+    <script>
+        tinymce.init({
+            selector: 'textarea',
+            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage advtemplate ai mentions tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss markdown',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+            tinycomments_mode: 'embedded',
+            tinycomments_author: 'Author name',
+            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject("See docs to implement AI Assistant")),
+        });
+    </script>
+}

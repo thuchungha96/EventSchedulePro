@@ -19,6 +19,7 @@ namespace EventSchedulePro.Pages
         {
             public string Username { get; set; }
             public string Staff { get; set; }
+            public string MultiHTML { get; set; }
         }
 
         public readonly EventDBContext _context;
@@ -62,6 +63,7 @@ namespace EventSchedulePro.Pages
         public async Task<IActionResult> OnPostFindStaffAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
+            string ta = Input.MultiHTML;
             if (String.IsNullOrEmpty(Input.Staff))
             {
                 ModelState.AddModelError(string.Empty, "Invalid Staff");

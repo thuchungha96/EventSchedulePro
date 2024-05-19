@@ -17,5 +17,6 @@ namespace EventSchedulePro.Data.Context
         public DbSet<Group> Groups { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<Staff> Staffs { get; set;}
+        public DbSet<Content> Contents { get; set; }
     }
 }

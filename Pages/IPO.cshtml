@@ -1,7 +1,15 @@
 ﻿@page
+@using EventSchedulePro.Data.Context
 @model EventSchedulePro.Pages.IPOModel
+@inject EventDBContext _context;
 @{
+    var IPOContext = _context.Contents.OrderByDescending(x => x.CreateTime).FirstOrDefault(x => x.Type.CompareTo("IPO") == 0);
 }
+
+@if (IPOContext != null)
+    @Html.Raw(IPOContext.ContentHTML?.ToString())
+
+    <!--
 <h3>In-Person Orientation (IPO)</h3>
 <span class="instructure_file_holder link_holder instructure_file_link_holder ally-file-link-holder">
     <a class="inline_disabled preview_in_overlay" title="IPO - FINAL - Staff Schedule Spring 2024-1.pdf" href="https://greenriver.instructure.com/courses/1461746/files/244954499?wrap=1" target="_blank" data-canvas-previewable="false" data-api-endpoint="https://greenriver.instructure.com/api/v1/courses/1461746/files/244954499" data-api-returntype="File" data-id="244954499">Spring 2024 Staff Schedule</a><a class="file_download_btn" role="button" download="" style="margin-inline-start: 5px; text-decoration: none;" href="https://greenriver.instructure.com/courses/1461746/files/244954499/download?download_frd=1" data-id="244954499">
@@ -17,4 +25,9 @@
 <br/>
 <a title="IPO Campus Tours" href="https://greenriver.instructure.com/courses/1461746/pages/ipo-campus-tours" data-course-type="wikiPages" data-published="true" data-api-endpoint="https://greenriver.instructure.com/api/v1/courses/1461746/pages/ipo-campus-tours" data-api-returntype="Page">Campus Tour Routes</a>
 <br/>
+
+
 <img src="https://greenriver.instructure.com/courses/1461746/files/244973432/preview" alt="Adventure Trip Info.jpg" width="317" height="528" data-api-endpoint="https://greenriver.instructure.com/api/v1/courses/1461746/files/244973432" data-api-returntype="File" data-id="244973432">
+
+
+-->

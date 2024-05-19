@@ -8,7 +8,7 @@ using MySql.Data.MySqlClient;
 using System.Globalization;
 using System.Net.WebSockets;
 
-namespace EventSchedulePro.Pages
+namespace EventSchedulePro.Pages.Admin
 {
     public class ExcelReaderModel : PageModel
     {
@@ -22,13 +22,18 @@ namespace EventSchedulePro.Pages
             _context = context;
         }
 
-        public void OnGet()
+        public IActionResult OnGet()
         {
+            var userName = HttpContext.Session.GetString("AdminUserName");
+            if (!string.IsNullOrEmpty(userName))
+            {
+                return new RedirectToPageResult("/Index");
+            }
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             var uploadFol = $"{Directory.GetCurrentDirectory()}\\wwwroot\\Uploads";
             var filepat = Path.Combine(uploadFol, FileNameExample);
             if (System.IO.File.Exists(filepat))
-            {            
+            {
                 using (var stream = System.IO.File.Open(filepat, FileMode.Open, FileAccess.Read))
                 {
                     var exceldata = new List<List<object>>();
@@ -38,7 +43,7 @@ namespace EventSchedulePro.Pages
                         {
                             while (reader.Read())
                             {
-                                var rowData = new List<Object>();
+                                var rowData = new List<object>();
                                 for (int i = 0; i < reader.FieldCount; i++)
                                     rowData.Add(reader.GetValue(i));
                                 exceldata.Add(rowData);
@@ -49,6 +54,7 @@ namespace EventSchedulePro.Pages
                     ViewData["ExcelData"] = exceldata;
                 }
             }
+            return Page();
         }
 
         [HttpPost("UpdateFile")]
@@ -71,7 +77,7 @@ namespace EventSchedulePro.Pages
                     {
                         System.IO.File.Delete(filepat);
                     }
-                    
+
                     using (var stream = new FileStream(filepat, FileMode.Create))
                     {
                         await file.CopyToAsync(stream);
@@ -85,7 +91,7 @@ namespace EventSchedulePro.Pages
                             {
                                 while (reader.Read())
                                 {
-                                    var rowData = new List<Object>();
+                                    var rowData = new List<object>();
                                     for (int i = 0; i < reader.FieldCount; i++)
                                         rowData.Add(reader.GetValue(i));
                                     exceldata.Add(rowData);
@@ -98,7 +104,8 @@ namespace EventSchedulePro.Pages
                     }
 
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 ViewData["Exceptiona"] = ex.ToString();
             }
@@ -106,7 +113,7 @@ namespace EventSchedulePro.Pages
         }
         private async void saveFileIntoDatabase(List<List<object>> o)
         {
-            for (int i=1; i<o.Count; i++)
+            for (int i = 1; i < o.Count; i++)
             {
                 //Time = o[i][0];
                 //Activity = o[i][1];
@@ -117,10 +124,10 @@ namespace EventSchedulePro.Pages
                 //Location = o[i][6];
                 //Check Group not exited then insert
                 string groupFromExcel = o[i][4]?.ToString();
-                if (String.IsNullOrEmpty(groupFromExcel)) groupFromExcel = "All";
+                if (string.IsNullOrEmpty(groupFromExcel)) groupFromExcel = "All";
                 {
                     {
-                        if (!String.IsNullOrEmpty(groupFromExcel))
+                        if (!string.IsNullOrEmpty(groupFromExcel))
                         {
                             var groupList = groupFromExcel.Trim().Split(",");
                             foreach (var item in groupList)
@@ -137,7 +144,7 @@ namespace EventSchedulePro.Pages
                     }
                     //Check Staff not exited then insert
                     {
-                        if (!String.IsNullOrEmpty(o[i][5]?.ToString()))
+                        if (!string.IsNullOrEmpty(o[i][5]?.ToString()))
                         {
                             var StaffList = o[i][5].ToString().Trim().Split(",");
                             foreach (var item in StaffList)
@@ -154,7 +161,7 @@ namespace EventSchedulePro.Pages
                     }
                     //Insert Staff into new Group
                     {
-                        if (!String.IsNullOrEmpty(groupFromExcel) && !String.IsNullOrEmpty(o[i][5]?.ToString()))
+                        if (!string.IsNullOrEmpty(groupFromExcel) && !string.IsNullOrEmpty(o[i][5]?.ToString()))
                         {
                             var groupList = groupFromExcel.Trim().Split(",");
                             var StaffList = o[i][5].ToString().Trim().Split(",");
@@ -164,7 +171,8 @@ namespace EventSchedulePro.Pages
                             string GroupNames = "";
                             string StaffIds = "";
                             string StaffNames = "";
-                            foreach(var item in groupList) {
+                            foreach (var item in groupList)
+                            {
                                 var group = g.FirstOrDefault(x => x.Name == item.Trim());
                                 if (group != null)
                                 {
@@ -184,8 +192,8 @@ namespace EventSchedulePro.Pages
                             }
 
                             if (!string.IsNullOrEmpty(GroupIds) && !string.IsNullOrEmpty(GroupNames))
-                            foreach (var item in StaffList)
-                            {
+                                foreach (var item in StaffList)
+                                {
                                     var staff = _context.Staffs.FirstOrDefault(x => x.UserName == item.Trim());
                                     if (staff != null)
                                     {
@@ -193,11 +201,11 @@ namespace EventSchedulePro.Pages
                                         staff.GroupNames = GroupNames;
                                         _context.SaveChanges();
                                     }
-                            }
+                                }
                             var time = o[i][0].ToString().Trim().Split("-");
                             string starttime = "";
                             string endtime = "";
-                            for (int j=0; j<time.Length; j++)
+                            for (int j = 0; j < time.Length; j++)
                             {
                                 var timeRaw = time[j].Trim();
                                 try
@@ -206,7 +214,8 @@ namespace EventSchedulePro.Pages
                                     if (j == 0)
                                         starttime = timeParse.ToString("HH:mm");
                                     else endtime = timeParse.ToString("HH:mm");
-                                } catch(Exception) { }
+                                }
+                                catch (Exception) { }
                             }
 
                             foreach (var item in groupList)
@@ -233,7 +242,7 @@ namespace EventSchedulePro.Pages
                                 }
                             }
 
-                        }   
+                        }
                     }
                     //Insert Schedule
                 }
@@ -242,7 +251,7 @@ namespace EventSchedulePro.Pages
         public static string Base64Encode(string plainText)
         {
             var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
-            return System.Convert.ToBase64String(plainTextBytes);
+            return Convert.ToBase64String(plainTextBytes);
         }
     }
 
