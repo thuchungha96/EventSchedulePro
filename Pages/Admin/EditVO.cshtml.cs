@@ -27,11 +27,16 @@ namespace EventSchedulePro.Pages.Admin
             {
                 return new RedirectToPageResult("/Index");
             }
-            //   var IPOContext = _context.Contents.OrderByDescending(x => x.CreateTime).FirstOrDefault(x => x.Type.CompareTo("IPO") == 0);
-            //    if (IPOContext != null)
-            //   {
-            //     Input.MultiHTML = IPOContext.ContentHTML;
-            //   }
+            if (Input == null)
+            {
+                Input = new InputModel();
+            }
+            var IPOContext = _context.Contents.OrderByDescending(x => x.CreateTime).FirstOrDefault(x => x.Type.CompareTo("VO") == 0);
+            if (IPOContext != null)
+            {
+                Input.MultiHTML = IPOContext.ContentHTML;
+            }
+
             return Page();
         }
         [HttpPost("FindStaff")]
