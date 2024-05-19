@@ -1,6 +1,7 @@
 using EventSchedulePro.Data;
 using EventSchedulePro.Data.Class;
 using EventSchedulePro.Data.Context;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MySql.Data.MySqlClient;
@@ -33,6 +34,7 @@ namespace EventSchedulePro.Pages
             {
                 HttpContext.Session.SetString("Staff", staff);
             }
+            staff = HttpContext.Session.GetString("Staff");
             if (string.IsNullOrEmpty(userNameAdmin) && string.IsNullOrEmpty(userName) && string.IsNullOrEmpty(staff))
             {
                 return new RedirectToPageResult("/Login");
