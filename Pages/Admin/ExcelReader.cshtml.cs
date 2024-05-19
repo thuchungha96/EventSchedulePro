@@ -25,7 +25,7 @@ namespace EventSchedulePro.Pages.Admin
         public IActionResult OnGet()
         {
             var userName = HttpContext.Session.GetString("AdminUserName");
-            if (!string.IsNullOrEmpty(userName))
+            if (string.IsNullOrEmpty(userName))
             {
                 return new RedirectToPageResult("/Index");
             }
