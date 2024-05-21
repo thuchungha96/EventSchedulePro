@@ -1,6 +1,26 @@
 ﻿@page
+@using EventSchedulePro.Data.Context
 @model EventSchedulePro.Pages.AllScheduleModel
+@inject EventDBContext _context;
 @{
+    var EventSchedules = (from sc in _context.Schedules
+                   join grj in _context.Groups on sc.GroupID ?? "" equals grj.Id.ToString() into grs
+                   from gr in grs.DefaultIfEmpty()
+                   select new
+                   {
+                       id = sc.Id,
+                       name = sc.Name,
+                       activity = sc.Activity ?? "",
+                       studentLeader = sc.StudentLeader ?? "",
+                       note = sc.Note ?? "",
+                       date = sc.Date,
+                       location = sc.Location,
+                       groupName = gr != null ? gr.Name : "None",
+                       groupId = sc.GroupID,
+                       fromTime = sc.FromTime ?? "",
+                       toTime = sc.ToTime ?? "",
+                       StaffNames = sc.StaffNames
+                   }).ToList();
 }
 <div class="col-md-12">
 <button class="btn btn-outline-primary" id="printable" style="width:100%">Print data</button>
@@ -8,25 +28,25 @@
 </div>
 <div class="row" id="printTable">
     @{
-        var tlist = (List<List<object>>)ViewData["ExcelData"];
+      
     }
     <div class="col-md-12">
         <ul class="timeline" >
             @{
-                if (tlist != null && tlist.Count > 0)
+                if (EventSchedules != null && EventSchedules.Count > 0)
                 {
-                    @for (int i = 1; i < tlist.Count(); i++)
+                    @foreach(var item in  EventSchedules)
                     {
                         <li>
-                            <p class="timeline-date">@tlist[i][0]</p>
+                            <p class="timeline-date">@item.fromTime - @item.toTime </p>
                             <div class="timeline-content">
-                                <h3>@tlist[i][1]</h3>
+                                <h3>@item.activity</h3>
                                 <p>
-                                    Notes: <b>@tlist[i][2]</b> <br />
-                                    Student Leader: <a style="color:green">@tlist[i][3]</a><br />
-                                    Staff: <a style="color:deepskyblue">@tlist[i][5]</a><br />
-                                    Group:  <a style="color:darkslategrey">@tlist[i][4]</a><br />
-                                    Location:  <a style="color:coral">@tlist[i][6]</a>
+                                    Notes: <b>@item.note</b> <br />
+                                    Student Leader: <a style="color:green">@item.studentLeader</a><br />
+                                    Staff: <a style="color:deepskyblue">@item.StaffNames</a><br />
+                                    Group:  <a style="color:darkslategrey">@item.groupName</a><br />
+                                    Location:  <a style="color:coral">@item.location</a>
                                 </p>
                             </div>
                         </li>

@@ -9,6 +9,7 @@ namespace EventSchedulePro.Pages
         private string FileNameExample = "excel";
         public void OnGet()
         {
+            /*
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             var uploadFol = $"{Directory.GetCurrentDirectory()}\\wwwroot\\Uploads";
             var filepat = Path.Combine(uploadFol, FileNameExample);
@@ -33,7 +34,7 @@ namespace EventSchedulePro.Pages
                     }
                     ViewData["ExcelData"] = exceldata;
                 }
-            }
+            } */
         }
     }
 }

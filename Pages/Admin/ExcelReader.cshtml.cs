@@ -124,7 +124,7 @@ namespace EventSchedulePro.Pages.Admin
                 //Location = o[i][6];
                 //Check Group not exited then insert
                 string groupFromExcel = o[i][4]?.ToString();
-                if (string.IsNullOrEmpty(groupFromExcel)) groupFromExcel = "All";
+                if (string.IsNullOrEmpty(groupFromExcel)) groupFromExcel = "";
                 {
                     {
                         if (!string.IsNullOrEmpty(groupFromExcel))
